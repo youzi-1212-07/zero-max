@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero-Max 待办清单</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+        }
+
+        .btn-secondary {
+            background: #757575;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #616161;
+        }
+
+        .switch-link {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+        }
+
+        .switch-link a {
+            color: #4CAF50;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .switch-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* 待办页面样式 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header span {
+            color: #666;
+        }
+
+        .header button {
+            background: none;
+            border: none;
+            color: #f44336;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .add-todo {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .add-todo input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .add-todo input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .add-todo button {
+            padding: 12px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .add-todo button:hover {
+            background: #45a049;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .todo-list {
+            list-style: none;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            gap: 10px;
+        }
+
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+
+        .todo-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .todo-item .title {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .todo-item .title.done {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .todo-item .delete-btn {
+            background: none;
+            border: none;
+            color: #f44336;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .todo-item .delete-btn:hover {
+            color: #d32f2f;
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+            font-size: 16px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录/注册页面 -->
+    <div class="container" id="auth-page">
+        <h1 id="auth-title">登录</h1>
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input type="text" id="username" placeholder="请输入用户名">
+        </div>
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" id="password" placeholder="请输入密码">
+        </div>
+        <button class="btn btn-primary" id="auth-btn" onclick="handleAuth()">登录</button>
+        <div class="switch-link">
+            <span id="switch-text">没有账号？</span>
+            <a id="switch-link" onclick="toggleAuthMode()">去注册</a>
+        </div>
+        <div class="error-msg" id="auth-error"></div>
+    </div>
+
+    <!-- 待办清单页面 -->
+    <div class="container hidden" id="todo-page">
+        <div class="header">
+            <span id="welcome-text"></span>
+            <button onclick="logout()">退出登录</button>
+        </div>
+
+        <div class="add-todo">
+            <input type="text" id="new-todo" placeholder="添加新的待办事项..." onkeydown="if(event.key==='Enter') addTodo()">
+            <button onclick="addTodo()">添加</button>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterTodos(null, this)">全部</button>
+            <button class="filter-btn" onclick="filterTodos(false, this)">未完成</button>
+            <button class="filter-btn" onclick="filterTodos(true, this)">已完成</button>
+        </div>
+
+        <ul class="todo-list" id="todo-list"></ul>
+        <div class="empty-msg hidden" id="empty-msg">暂无待办事项</div>
+    </div>
+
+    <script>
+        // ========================
+        // 全局变量
+        // ========================
+        let currentUser = null;  // 当前登录的用户
+        let isLoginMode = true;  // 当前是登录还是注册模式
+        const API = '';          // API 基础地址（因为前端和后端在同一台服务器，所以为空）
+
+        // ========================
+        // 登录/注册相关
+        // ========================
+
+        // 切换登录/注册模式
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').textContent = isLoginMode ? '登录' : '注册';
+            document.getElementById('auth-btn').textContent = isLoginMode ? '登录' : '注册';
+            document.getElementById('switch-text').textContent = isLoginMode ? '没有账号？' : '已有账号？';
+            document.getElementById('switch-link').textContent = isLoginMode ? '去注册' : '去登录';
+            document.getElementById('auth-error').textContent = '';
+        }
+
+        // 处理登录/注册
+        async function handleAuth() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorEl = document.getElementById('auth-error');
+
+            if (!username || !password) {
+                errorEl.textContent = '请输入用户名和密码';
+                return;
+            }
+
+            const endpoint = isLoginMode ? '/api/login' : '/api/register';
+
+            try {
+                const res = await fetch(API + endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errorEl.textContent = data.error || '操作失败';
+                    return;
+                }
+
+                // 登录/注册成功
+                currentUser = { id: data.id, username: data.username };
+                showTodoPage();
+            } catch (err) {
+                errorEl.textContent = '网络错误，请检查后端是否启动';
+            }
+        }
+
+        // ========================
+        // 待办页面相关
+        // ========================
+
+        // 显示待办页面
+        function showTodoPage() {
+            document.getElementById('auth-page').classList.add('hidden');
+            document.getElementById('todo-page').classList.remove('hidden');
+            document.getElementById('welcome-text').textContent = '你好，' + currentUser.username;
+            loadTodos();
+        }
+
+        // 加载待办列表
+        async function loadTodos(done = null) {
+            let url = API + '/api/todos?userId=' + currentUser.id;
+            if (done !== null) {
+                url += '&done=' + done;
+            }
+
+            try {
+                const res = await fetch(url);
+                const todos = await res.json();
+                renderTodos(todos);
+            } catch (err) {
+                console.error('加载待办失败:', err);
+            }
+        }
+
+        // 渲染待办列表
+        function renderTodos(todos) {
+            const list = document.getElementById('todo-list');
+            const emptyMsg = document.getElementById('empty-msg');
+
+            if (todos.length === 0) {
+                list.innerHTML = '';
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+
+            emptyMsg.classList.add('hidden');
+            list.innerHTML = todos.map(todo => `
+                <li class="todo-item">
+                    <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${todo.id})">
+                    <span class="title ${todo.done ? 'done' : ''}">${escapeHtml(todo.title)}</span>
+                    <button class="delete-btn" onclick="deleteTodo(${todo.id})">删除</button>
+                </li>
+            `).join('');
+        }
+
+        // 添加待办
+        async function addTodo() {
+            const input = document.getElementById('new-todo');
+            const title = input.value.trim();
+            if (!title) return;
+
+            try {
+                const res = await fetch(API + '/api/todos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: currentUser.id, title })
+                });
+
+                if (res.ok) {
+                    input.value = '';
+                    loadTodos();
+                }
+            } catch (err) {
+                console.error('添加待办失败:', err);
+            }
+        }
+
+        // 切换待办状态
+        async function toggleTodo(id) {
+            try {
+                await fetch(API + '/api/todos/' + id + '?userId=' + currentUser.id, {
+                    method: 'PUT'
+                });
+                loadTodos();
+            } catch (err) {
+                console.error('更新待办失败:', err);
+            }
+        }
+
+        // 删除待办
+        async function deleteTodo(id) {
+            try {
+                await fetch(API + '/api/todos/' + id + '?userId=' + currentUser.id, {
+                    method: 'DELETE'
+                });
+                loadTodos();
+            } catch (err) {
+                console.error('删除待办失败:', err);
+            }
+        }
+
+        // 筛选待办
+        function filterTodos(done, btn) {
+            // 更新按钮样式
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // 加载对应数据
+            loadTodos(done);
+        }
+
+        // 退出登录
+        function logout() {
+            currentUser = null;
+            document.getElementById('auth-page').classList.remove('hidden');
+            document.getElementById('todo-page').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // 防止 XSS 攻击的简单转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
