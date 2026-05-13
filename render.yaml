@@ -2,7 +2,7 @@ services:
   - type: web
     name: zero-max
     runtime: java
-    buildCommand: ./mvnw clean package -DskipTests
+    buildCommand: curl -sL https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.6/apache-maven-3.9.6-bin.tar.gz | tar xz && ./apache-maven-3.9.6/bin/mvn clean package -DskipTests
     startCommand: java -jar target/zero-max-1.0.0.jar
     envVars:
       - key: DATABASE_URL
