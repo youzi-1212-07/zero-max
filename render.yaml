@@ -2,7 +2,7 @@ services:
   - type: web
     name: zero-max
     runtime: java
-    buildCommand: mvn clean package -DskipTests
+    buildCommand: ./mvnw clean package -DskipTests
     startCommand: java -jar target/zero-max-1.0.0.jar
     envVars:
       - key: DATABASE_URL
